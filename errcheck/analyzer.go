@@ -9,11 +9,17 @@ import (
 	"golang.org/x/tools/go/analysis"
 )
 
-var Analyzer = &analysis.Analyzer{
-	Name:       "errcheck",
-	Doc:        "check for unchecked errors",
-	Run:        runAnalyzer,
-	ResultType: reflect.TypeOf(Result{}),
+var Analyzer = NewAnalyzer(map[string]bool{})
+
+func NewAnalyzer(exclude map[string]bool) *analysis.Analyzer {
+	return &analysis.Analyzer{
+		Name: "errcheck",
+		Doc:  "check for unchecked errors",
+		Run: func(pass *analysis.Pass) (interface{}, error) {
+			return runAnalyzer(exclude, pass)
+		},
+		ResultType: reflect.TypeOf(Result{}),
+	}
 }
 
 var (
@@ -30,8 +36,7 @@ func init() {
 	Analyzer.Flags.BoolVar(&argExcludeOnly, "excludeonly", false, "Use only excludes from exclude file")
 }
 
-func runAnalyzer(pass *analysis.Pass) (interface{}, error) {
-	exclude := map[string]bool{}
+func runAnalyzer(exclude map[string]bool, pass *analysis.Pass) (interface{}, error) {
 	if !argExcludeOnly {
 		for _, name := range DefaultExcludedSymbols {
 			exclude[name] = true
