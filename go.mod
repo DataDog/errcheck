@@ -2,6 +2,8 @@ module github.com/kisielk/errcheck
 
 go 1.22.0
 
+toolchain go1.26.2
+
 require golang.org/x/tools v0.30.0
 
 require (
